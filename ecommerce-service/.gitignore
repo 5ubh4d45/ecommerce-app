@@ -38,3 +38,7 @@ out/
 
 ### local databases ###
 /data
+
+
+### keys ###
+src/main/resources/keys/*
