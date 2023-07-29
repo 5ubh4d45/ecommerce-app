@@ -130,7 +130,8 @@ public class SecurityConfig {
         return http
                 .securityMatcher(new AntPathRequestMatcher("/api/v1/auth/**"))
                 .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers(new AntPathRequestMatcher("/api/v1/auth/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/v1/auth/signup/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/v1/auth/login/**")).permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(csrf -> csrf.disable())
@@ -148,6 +149,7 @@ public class SecurityConfig {
 
         httpSecurity
                 .csrf(csrf -> csrf.disable())
+                .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
                 .authorizeHttpRequests(auth -> auth
                         // TODO: update requestMatchers when the bug is fixed https://github.com/spring-projects/spring-security/issues/13568
 //                        .requestMatchers(new AntPathRequestMatcher("/api/v1/auth/**")).permitAll()

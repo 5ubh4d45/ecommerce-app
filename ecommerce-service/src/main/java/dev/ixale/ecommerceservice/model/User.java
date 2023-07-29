@@ -9,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -38,7 +39,11 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "user_authorities", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "authorities", nullable = false)
-    private Set<GrantedAuthority> authorities;
+    private Set<GrantedAuthority> authorities = new HashSet<>();
+
+    public Set<GrantedAuthority> getAuthoritiesSet() {
+        return authorities;
+    }
 
     public Collection<? extends GrantedAuthority> getRoles() {
         return authorities.stream().filter(authority -> authority.getAuthority().startsWith("ROLE_")).collect(Collectors.toSet());
@@ -60,21 +65,21 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return true;
     }
 }
