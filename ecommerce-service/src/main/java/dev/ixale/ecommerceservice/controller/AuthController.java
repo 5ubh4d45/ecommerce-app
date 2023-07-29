@@ -8,6 +8,8 @@ import dev.ixale.ecommerceservice.enums.UserAuthority;
 import dev.ixale.ecommerceservice.model.User;
 import dev.ixale.ecommerceservice.service.TokenService;
 import dev.ixale.ecommerceservice.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.slf4j.Logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -42,6 +44,7 @@ public class AuthController {
         this.passEncoder = passEncoder;
     }
 
+    @Operation(security = @SecurityRequirement(name = "noAuth"))
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponseDto>> login(@RequestBody LoginRequestDto loginReq) {
         Authentication authentication;
@@ -61,11 +64,13 @@ public class AuthController {
                 new LoginResponseDto(authentication.getName(), token), "Login successful!"));
     }
 
+    @Operation(security = @SecurityRequirement(name = "basicAuth"))
     @PostMapping("/token")
     public String token(Authentication authentication) {
         return tokenService.generateToken(authentication);
     }
 
+    @Operation(security = @SecurityRequirement(name = "noAuth"))
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<LoginResponseDto>> signup(@RequestBody SignUpRequestDto signupReq) {
         if (userService.exists(signupReq.username(), signupReq.email())){
@@ -84,6 +89,7 @@ public class AuthController {
                 new LoginResponseDto(value.getUsername(), ""), "Signup successful!")))
                 .orElseGet(() -> ResponseEntity.badRequest().body(ApiResponse.error("Signup failed!")));
     }
+
 
     @PostMapping("/logout")
     public String logout() {
