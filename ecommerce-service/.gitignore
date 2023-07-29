@@ -35,3 +35,10 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### local databases ###
+/data
+
+
+### keys ###
+src/main/resources/keys/*
