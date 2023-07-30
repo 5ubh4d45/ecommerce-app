@@ -20,6 +20,9 @@ import java.util.stream.Collectors;
 @Entity
 @Table(name = "users")
 public class User implements UserDetails {
+
+    private static final String DELIMITER = " ";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", updatable = false, nullable = false)
@@ -28,32 +31,39 @@ public class User implements UserDetails {
     @Column(name = "username", unique = true, nullable = false, length = 20)
     private String username;
 
+    @Column(name = "first_name", nullable = false, length = 20)
+    private String firstName;
+
+    @Column(name = "last_name", nullable = false, length = 20)
+    private String lastName;
+
     @Column(name = "password", nullable = false)
     private String password;
 
     @Column(name = "email", unique = true, nullable = false)
     private String email;
 
-    @ElementCollection(targetClass = Authority.class, fetch = FetchType.EAGER)
-    @Enumerated(EnumType.STRING)
-    @CollectionTable(
-            name = "user_authorities",
-            joinColumns = @JoinColumn(name = "user_id",referencedColumnName = "id"),
-            foreignKey = @ForeignKey(name = "user_authorities_fk"))
     @Column(name = "authorities", nullable = false)
-    private Set<Authority> authorities;
+    private String authorities;
+
+
+    public void setAuthorities(Set<Authority> authorities) {
+        this.authorities = Authority.fromAuthority(authorities, DELIMITER);
+    }
 
     public Set<Authority> getAuthoritiesSet() {
-        return authorities;
+        return Authority.toAuthority(this.authorities, DELIMITER);
     }
 
     public Collection<? extends GrantedAuthority> getRoles() {
-        return authorities.stream().filter(authority -> authority.getAuthority().startsWith("ROLE_")).collect(Collectors.toSet());
+        return this.getAuthoritiesSet().stream()
+                .filter(authority -> authority.getAuthority().startsWith("ROLE_"))
+                .collect(Collectors.toSet());
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
+        return Authority.toAuthority(this.authorities, DELIMITER);
     }
 
     @Override

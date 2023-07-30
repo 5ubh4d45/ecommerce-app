@@ -14,28 +14,28 @@ public interface CategoryService {
      * List all categories
      * @return List of all categories
      */
-    public List<Category> listCategories();
+    List<Category> listCategories();
 
     /**
      * Read a category by name
      * @param categoryName Name of category to be read
      * @return Category with given name
      */
-    public Optional<Category> readCategory(String categoryName);
+    Optional<Category> readCategory(String categoryName);
 
     /**
      * Read a category by id
      * @param categoryId Id of category to be read
      * @return Category with given id
      */
-    public Optional<Category> readCategory(Long categoryId);
+    Optional<Category> readCategory(Long categoryId);
 
     /**
      * Create a new category
      * @param category Category to be created
      * @return Created category
      */
-    public Category createCategory(Category category);
+    Category createCategory(Category category);
 
     /**
      * Update a category
@@ -43,12 +43,12 @@ public interface CategoryService {
      * @param newCategory New category data
      * @return Updated category
      */
-    public Optional<Category> updateCategory(Long categoryId, Category newCategory);
+    Optional<Category> updateCategory(Long categoryId, Category newCategory);
 
     /**
      * Delete a category
      * @param categoryId Id of category to be deleted
      * @return Deleted category
      */
-    public Optional<Category> deleteCategory(Long categoryId);
+    Optional<Category> deleteCategory(Long categoryId);
 }

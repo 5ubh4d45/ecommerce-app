@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -36,7 +37,6 @@ public class HomeController {
     }
 
 
-    @PreAuthorize("hasAuthority('USER')")
     @GetMapping("/user")
     public String user(Authentication authentication) {
 
@@ -59,21 +59,18 @@ public class HomeController {
 
     @Operation(security = @SecurityRequirement(name = "noAuth"))
     @GetMapping(path = "/tokenDetails")
-    public ResponseEntity<Map<String, String>> getTokenDetails(@AuthenticationPrincipal Jwt jwt,
-                                                               @RequestBody TokenBody body) {
-        if (jwt == null) {
-            String token = body.token();
-            jwt = jwtDecoder.decode(token);
-        }
-        return ResponseEntity.ok(Map.of(
-                        "Scope", jwt.getClaim("scope"),
-                        "Name", jwt.getClaim("name"),
-                        "Subject", jwt.getSubject(),
-                        "Issued at", Objects.requireNonNull(jwt.getIssuedAt()).toString(),
-                        "Expires at:", Objects.requireNonNull(jwt.getExpiresAt()).toString(),
-                        "Token Value", jwt.getTokenValue()
-                )
-        );
+    public ResponseEntity<Map<String, String>> getTokenDetails(@RequestBody TokenBody body) {
+        Jwt jwt = jwtDecoder.decode(body.token());
+
+        Map<String, String> map = new HashMap<>();
+        map.put("Scope", jwt.getClaim("scope"));
+        map.put("User Name", jwt.getClaim("username"));
+        map.put("Subject", jwt.getSubject());
+        map.put("Issued at", Objects.requireNonNull(jwt.getIssuedAt()).toString());
+        map.put("Expires at:", Objects.requireNonNull(jwt.getExpiresAt()).toString());
+        map.put("Token Value", jwt.getTokenValue());
+
+        return ResponseEntity.ok(map);
     }
 
     public record TokenBody(String token) {}

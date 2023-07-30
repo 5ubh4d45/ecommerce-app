@@ -29,7 +29,10 @@ public class Category {
     private @NotBlank String imageUrl;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "category",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
     private Set<Product> products = new HashSet<>();
 
     @Override
@@ -45,6 +48,6 @@ public class Category {
                 ", description='" + description + '\'' +
                 ", imageUrl='" + imageUrl + '\'' +
                 "}\n" +
-                productsString.toString();
+                productsString;
     }
 }

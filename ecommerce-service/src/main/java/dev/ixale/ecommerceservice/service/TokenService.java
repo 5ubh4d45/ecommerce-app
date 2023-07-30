@@ -35,14 +35,14 @@ public class TokenService {
                 .expiresAt(now.plus(1, ChronoUnit.HOURS))
                 .subject(authentication.getName())
                 .claim("scope", scope)
-                .claim("name", authentication.getName())
+                .claim("username", authentication.getName())
                 .build();
 
         LOGGER.debug("\n" +
-                "Token Requested for user: " + authentication.getName() + "\n" +
-                "at: " + now + "\n" +
-                "with credentials: " + authentication.getCredentials() + "\n" +
-                "with scope: " + scope);
+                "Token Requested for user: " + authentication.getName() +
+                "at: " + now +
+                ", with credentials: " + authentication.getCredentials() +
+                ", with scope: " + scope);
 
         return this.jwtEncoder.encode(JwtEncoderParameters.from(claimsSet)).getTokenValue();
     }

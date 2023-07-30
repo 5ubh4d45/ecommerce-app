@@ -1,28 +1,31 @@
 package dev.ixale.ecommerceservice.controller;
 
 import dev.ixale.ecommerceservice.common.ApiResponse;
+import dev.ixale.ecommerceservice.common.Utils;
 import dev.ixale.ecommerceservice.dto.LoginRequestDto;
 import dev.ixale.ecommerceservice.dto.LoginResponseDto;
-import dev.ixale.ecommerceservice.dto.SignUpRequestDto;
+import dev.ixale.ecommerceservice.dto.UserDto;
 import dev.ixale.ecommerceservice.enums.Authority;
 import dev.ixale.ecommerceservice.model.User;
 import dev.ixale.ecommerceservice.service.TokenService;
 import dev.ixale.ecommerceservice.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -44,7 +47,15 @@ public class AuthController {
 
     @Operation(security = @SecurityRequirement(name = "noAuth"))
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<LoginResponseDto>> login(@RequestBody LoginRequestDto loginReq) {
+    public ResponseEntity<ApiResponse<LoginResponseDto>> login(
+            @Valid @RequestBody LoginRequestDto loginReq,
+            BindingResult bindingResult) {
+
+        if (bindingResult.hasErrors()) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(
+                    Utils.notValid(bindingResult)));
+        }
+
         Authentication authentication;
 
         try {
@@ -70,28 +81,48 @@ public class AuthController {
 
     @Operation(security = @SecurityRequirement(name = "noAuth"))
     @PostMapping("/signup")
-    public ResponseEntity<ApiResponse<LoginResponseDto>> signup(@RequestBody SignUpRequestDto signupReq) {
-        if (userService.exists(signupReq.username(), signupReq.email())){
-            return ResponseEntity.badRequest().body(ApiResponse.error("Username or email already exists!"));
+    public ResponseEntity<ApiResponse<LoginResponseDto>> signup(
+            @Valid @RequestBody UserDto userDto, BindingResult bindingResult) {
+
+        if (bindingResult.hasErrors()) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(
+                    Utils.notValid(bindingResult)));
         }
 
-        User user = new User();
-        user.setUsername(signupReq.username());
-        user.setEmail(signupReq.email());
-        user.setPassword(passEncoder.encode(signupReq.password()));
-        user.setAuthorities(Set.of(Authority.USER, Authority.READ, Authority.WRITE));
+        if (userService.exists(userDto.username(), userDto.email())){
+            return ResponseEntity.badRequest().body(
+                    ApiResponse.error("Username or email already exists!"));
+        }
+
+        User user = userDto.toUser(passEncoder, Set.of(
+                Authority.USER,
+                Authority.READ,
+                Authority.WRITE
+                ));
 
         Optional<User> opt = userService.createUser(user);
 
         return opt.map(value -> ResponseEntity.ok(ApiResponse.success(
-                new LoginResponseDto(value.getUsername(), ""), "Signup successful!")))
-                .orElseGet(() -> ResponseEntity.badRequest().body(ApiResponse.error("Signup failed!")));
+                new LoginResponseDto(value.getUsername(), ""),
+                        "Signup successful! Please Login to continue.")))
+                .orElseGet(() -> ResponseEntity.badRequest()
+                        .body(ApiResponse.error("Signup failed!")));
     }
 
 
     @PostMapping("/logout")
     public String logout() {
         return "logout";
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<ApiResponse<String>> delete(@AuthenticationPrincipal Jwt jwt) {
+        Optional<User> opt = userService.deleteUser(jwt.getClaimAsString("username"));
+        if (opt.isEmpty()) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("User not found!"));
+        }
+        return ResponseEntity.ok(ApiResponse.success(
+                "User deleted successfully!", "User deleted successfully!"));
     }
 
 }
