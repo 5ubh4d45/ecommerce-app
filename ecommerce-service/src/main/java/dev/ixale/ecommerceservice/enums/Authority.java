@@ -2,7 +2,7 @@ package dev.ixale.ecommerceservice.enums;
 
 import org.springframework.security.core.GrantedAuthority;
 
-public enum UserAuthority implements GrantedAuthority {
+public enum Authority implements GrantedAuthority {
 
     READ("READ"),
     WRITE("WRITE"),
@@ -11,7 +11,7 @@ public enum UserAuthority implements GrantedAuthority {
 
     private final String authority;
 
-    UserAuthority(String authority) {
+    Authority(String authority) {
         this.authority = authority;
     }
 

@@ -4,13 +4,12 @@ import dev.ixale.ecommerceservice.common.ApiResponse;
 import dev.ixale.ecommerceservice.dto.LoginRequestDto;
 import dev.ixale.ecommerceservice.dto.LoginResponseDto;
 import dev.ixale.ecommerceservice.dto.SignUpRequestDto;
-import dev.ixale.ecommerceservice.enums.UserAuthority;
+import dev.ixale.ecommerceservice.enums.Authority;
 import dev.ixale.ecommerceservice.model.User;
 import dev.ixale.ecommerceservice.service.TokenService;
 import dev.ixale.ecommerceservice.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import org.slf4j.Logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -22,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -81,7 +79,7 @@ public class AuthController {
         user.setUsername(signupReq.username());
         user.setEmail(signupReq.email());
         user.setPassword(passEncoder.encode(signupReq.password()));
-        user.setAuthorities(Set.of(UserAuthority.USER, UserAuthority.READ, UserAuthority.WRITE));
+        user.setAuthorities(Set.of(Authority.USER, Authority.READ, Authority.WRITE));
 
         Optional<User> opt = userService.createUser(user);
 

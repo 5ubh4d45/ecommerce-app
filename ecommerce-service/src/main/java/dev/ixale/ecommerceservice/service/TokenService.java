@@ -35,7 +35,7 @@ public class TokenService {
                 .expiresAt(now.plus(1, ChronoUnit.HOURS))
                 .subject(authentication.getName())
                 .claim("scope", scope)
-                .claim("name", authentication.getName() + " CLAIM")
+                .claim("name", authentication.getName())
                 .build();
 
         LOGGER.debug("\n" +

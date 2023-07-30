@@ -1,5 +1,6 @@
 package dev.ixale.ecommerceservice.model;
 
+import dev.ixale.ecommerceservice.enums.Authority;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,8 +10,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,19 +34,23 @@ public class User implements UserDetails {
     @Column(name = "email", unique = true, nullable = false)
     private String email;
 
-    @ElementCollection
+    @ElementCollection(targetClass = Authority.class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
-    @CollectionTable(name = "user_authorities", joinColumns = @JoinColumn(name = "user_id"))
+    @CollectionTable(
+            name = "user_authorities",
+            joinColumns = @JoinColumn(name = "user_id",referencedColumnName = "id"),
+            foreignKey = @ForeignKey(name = "user_authorities_fk"))
     @Column(name = "authorities", nullable = false)
-    private Set<GrantedAuthority> authorities = new HashSet<>();
+    private Set<Authority> authorities;
 
-    public Set<GrantedAuthority> getAuthoritiesSet() {
+    public Set<Authority> getAuthoritiesSet() {
         return authorities;
     }
 
     public Collection<? extends GrantedAuthority> getRoles() {
         return authorities.stream().filter(authority -> authority.getAuthority().startsWith("ROLE_")).collect(Collectors.toSet());
     }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;

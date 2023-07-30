@@ -6,7 +6,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
-import dev.ixale.ecommerceservice.enums.UserAuthority;
+import dev.ixale.ecommerceservice.enums.Authority;
 import dev.ixale.ecommerceservice.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +16,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -76,11 +75,11 @@ public class SecurityConfig {
                 .withUser("admin")
                 .password(passwordEncoder.encode("admin"))
                 .roles("SU")
-                .authorities(UserAuthority.ADMIN, UserAuthority.WRITE, UserAuthority.READ);
+                .authorities(Authority.ADMIN, Authority.WRITE, Authority.READ);
         authManagerBuilder.inMemoryAuthentication()
                 .withUser("user")
                 .password(passwordEncoder.encode("user"))
-                .authorities(UserAuthority.USER, UserAuthority.READ);
+                .authorities(Authority.USER, Authority.READ);
 
         return authManagerBuilder.build();
     }
@@ -154,9 +153,9 @@ public class SecurityConfig {
                         // TODO: update requestMatchers when the bug is fixed https://github.com/spring-projects/spring-security/issues/13568
 //                        .requestMatchers(new AntPathRequestMatcher("/api/v1/auth/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/token")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/tokenDetails")).permitAll()
 //                        .requestMatchers(new AntPathRequestMatcher("/user")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/admin")).hasAuthority(UserAuthority.READ.getAuthority())
+                        .requestMatchers(new AntPathRequestMatcher("/admin")).hasAuthority(Authority.READ.getAuthority())
                         // swagger & h2-console
                         .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/swagger-ui/**")).permitAll()

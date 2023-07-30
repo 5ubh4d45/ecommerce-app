@@ -1,9 +1,10 @@
 package dev.ixale.ecommerceservice.controller;
 
-import dev.ixale.ecommerceservice.model.User;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -11,21 +12,23 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.URL;
-import java.security.Principal;
-import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestController
 public class HomeController {
     private final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AuthController.class);
+
+    private final JwtDecoder jwtDecoder;
+
+    public HomeController(JwtDecoder jwtDecoder) {
+        this.jwtDecoder = jwtDecoder;
+    }
 
     @GetMapping("/")
     public String home() {
@@ -53,15 +56,23 @@ public class HomeController {
                 + " with authorities " + authentication.getAuthorities();
     }
 
-    @GetMapping("/token")
-    public ResponseEntity<String> getToken(@AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(
-                "Scope: " + jwt.getClaim("scope")
-                        + "\nName: " + jwt.getClaim("name")
-                        + "\nSubject: " + jwt.getSubject()
-                        + "\nIssued at: " + Objects.requireNonNull(jwt.getIssuedAt())
-                        + "\nExpires at: " + Objects.requireNonNull(jwt.getExpiresAt())
-                        + "\nToken Value: " + jwt.getTokenValue()
+
+    @Operation(security = @SecurityRequirement(name = "noAuth"))
+    @GetMapping(path = "/tokenDetails")
+    public ResponseEntity<Map<String, String>> getTokenDetails(@AuthenticationPrincipal Jwt jwt,
+                                                               @RequestBody TokenBody body) {
+        if (jwt == null) {
+            String token = body.token();
+            jwt = jwtDecoder.decode(token);
+        }
+        return ResponseEntity.ok(Map.of(
+                        "Scope", jwt.getClaim("scope"),
+                        "Name", jwt.getClaim("name"),
+                        "Subject", jwt.getSubject(),
+                        "Issued at", Objects.requireNonNull(jwt.getIssuedAt()).toString(),
+                        "Expires at:", Objects.requireNonNull(jwt.getExpiresAt()).toString(),
+                        "Token Value", jwt.getTokenValue()
+                )
         );
     }
 
