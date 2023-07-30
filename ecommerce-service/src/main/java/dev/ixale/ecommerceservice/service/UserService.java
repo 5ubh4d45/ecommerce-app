@@ -6,18 +6,18 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import java.util.Optional;
 
 public interface UserService extends UserDetailsService {
-    public Optional<User> readUserByUsername(String username);
+    Optional<User> readUserByUsername(String username);
 
-    public Optional<User> readUserById(Long id);
+    Optional<User> readUserById(Long id);
 
-    public Optional<User> readUserByEmail(String email);
+    Optional<User> readUserByEmail(String email);
 
-    public Optional<User> createUser(User user);
+    Optional<User> createUser(User user);
 
-    public Optional<User> updateUser(String username, User newUser);
+    Optional<User> updateUser(String username, User newUser);
 
-    public Optional<User> deleteUser(String username);
+    Optional<User> deleteUser(String username);
 
-    public boolean exists(String username, String email);
+    boolean exists(String username, String email);
 
 }

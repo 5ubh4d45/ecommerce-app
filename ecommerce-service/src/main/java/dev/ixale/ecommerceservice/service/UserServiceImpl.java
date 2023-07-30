@@ -54,37 +54,56 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<User> createUser(User user) {
+        LOGGER.debug("\nNew creation request for user: {}", user);
+
         if (exists(user.getUsername(), user.getEmail())) {
             return Optional.empty();
         }
         userRepository.save(user);
+
+        LOGGER.debug("\nUser created: {}", user);
+
         return readUserByUsername(user.getUsername());
     }
 
     @Override
     public Optional<User> updateUser(String username, User newUser) {
+        LOGGER.debug("\nNew update request for user: {}", newUser);
+
         if (exists(username, newUser.getEmail())) {
             return Optional.empty();
         }
         Optional<User> opt = userRepository.findByUsername(username);
         if (opt.isPresent()) {
             User user = opt.get();
+//            Disabled some non changing fields
             user.setUsername(newUser.getUsername());
             user.setPassword(newUser.getPassword());
+            user.setFirstName(newUser.getFirstName());
+            user.setLastName(newUser.getLastName());
             user.setEmail(newUser.getEmail());
-            user.setAuthorities(newUser.getAuthoritiesSet());
+//            user.setAuthorities(newUser.getAuthoritiesSet());
             userRepository.save(user);
+
+            LOGGER.debug("\nUser updated: {}", user);
+
             return Optional.of(user);
         }
+
         return Optional.empty();
     }
 
     @Override
     public Optional<User> deleteUser(String username) {
+        LOGGER.debug("\nNew delete request for user: {}", username);
+
         Optional<User> opt = userRepository.findByUsername(username);
         if (opt.isPresent()) {
             User user = opt.get();
             userRepository.delete(user);
+
+            LOGGER.debug("\nUser deleted: {}", user);
+
             return Optional.of(user);
         }
         return Optional.empty();

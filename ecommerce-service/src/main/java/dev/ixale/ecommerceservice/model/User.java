@@ -1,5 +1,6 @@
 package dev.ixale.ecommerceservice.model;
 
+import dev.ixale.ecommerceservice.enums.Authority;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,8 +10,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,6 +20,9 @@ import java.util.stream.Collectors;
 @Entity
 @Table(name = "users")
 public class User implements UserDetails {
+
+    private static final String DELIMITER = " ";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", updatable = false, nullable = false)
@@ -29,28 +31,39 @@ public class User implements UserDetails {
     @Column(name = "username", unique = true, nullable = false, length = 20)
     private String username;
 
+    @Column(name = "first_name", nullable = false, length = 20)
+    private String firstName;
+
+    @Column(name = "last_name", nullable = false, length = 20)
+    private String lastName;
+
     @Column(name = "password", nullable = false)
     private String password;
 
     @Column(name = "email", unique = true, nullable = false)
     private String email;
 
-    @ElementCollection
-    @Enumerated(EnumType.STRING)
-    @CollectionTable(name = "user_authorities", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "authorities", nullable = false)
-    private Set<GrantedAuthority> authorities = new HashSet<>();
+    private String authorities;
 
-    public Set<GrantedAuthority> getAuthoritiesSet() {
-        return authorities;
+
+    public void setAuthorities(Set<Authority> authorities) {
+        this.authorities = Authority.fromAuthority(authorities, DELIMITER);
+    }
+
+    public Set<Authority> getAuthoritiesSet() {
+        return Authority.toAuthority(this.authorities, DELIMITER);
     }
 
     public Collection<? extends GrantedAuthority> getRoles() {
-        return authorities.stream().filter(authority -> authority.getAuthority().startsWith("ROLE_")).collect(Collectors.toSet());
+        return this.getAuthoritiesSet().stream()
+                .filter(authority -> authority.getAuthority().startsWith("ROLE_"))
+                .collect(Collectors.toSet());
     }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
+        return Authority.toAuthority(this.authorities, DELIMITER);
     }
 
     @Override
