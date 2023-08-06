@@ -1,6 +1,6 @@
 package dev.ixale.ecommerceservice.controller;
 
-import dev.ixale.ecommerceservice.common.ApiResponse;
+import dev.ixale.ecommerceservice.common.ApiRes;
 import dev.ixale.ecommerceservice.common.Utils;
 import dev.ixale.ecommerceservice.dto.LoginRequestDto;
 import dev.ixale.ecommerceservice.dto.LoginResponseDto;
@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -47,12 +46,12 @@ public class AuthController {
 
     @Operation(security = @SecurityRequirement(name = "noAuth"))
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<LoginResponseDto>> login(
+    public ResponseEntity<ApiRes<LoginResponseDto>> login(
             @Valid @RequestBody LoginRequestDto loginReq,
             BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
-            return ResponseEntity.badRequest().body(ApiResponse.error(
+            return ResponseEntity.badRequest().body(ApiRes.error(
                     Utils.notValid(bindingResult)));
         }
 
@@ -63,13 +62,13 @@ public class AuthController {
                     loginReq.username(), loginReq.password()));
         }
         catch (BadCredentialsException e) {
-            return ResponseEntity.badRequest().body(ApiResponse.error("Invalid username or password!"));
+            return ResponseEntity.badRequest().body(ApiRes.error("Invalid username or password!"));
         }
 
 
         String token = tokenService.generateToken(authentication);
 
-        return ResponseEntity.ok(ApiResponse.success(
+        return ResponseEntity.ok(ApiRes.success(
                 new LoginResponseDto(authentication.getName(), token), "Login successful!"));
     }
 
@@ -81,17 +80,17 @@ public class AuthController {
 
     @Operation(security = @SecurityRequirement(name = "noAuth"))
     @PostMapping("/signup")
-    public ResponseEntity<ApiResponse<LoginResponseDto>> signup(
+    public ResponseEntity<ApiRes<LoginResponseDto>> signup(
             @Valid @RequestBody UserDto userDto, BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
-            return ResponseEntity.badRequest().body(ApiResponse.error(
+            return ResponseEntity.badRequest().body(ApiRes.error(
                     Utils.notValid(bindingResult)));
         }
 
         if (userService.exists(userDto.username(), userDto.email())){
             return ResponseEntity.badRequest().body(
-                    ApiResponse.error("Username or email already exists!"));
+                    ApiRes.error("Username or email already exists!"));
         }
 
         User user = userDto.toUser(passEncoder, Set.of(
@@ -102,11 +101,11 @@ public class AuthController {
 
         Optional<User> opt = userService.createUser(user);
 
-        return opt.map(value -> ResponseEntity.ok(ApiResponse.success(
+        return opt.map(value -> ResponseEntity.ok(ApiRes.success(
                 new LoginResponseDto(value.getUsername(), ""),
                         "Signup successful! Please Login to continue.")))
                 .orElseGet(() -> ResponseEntity.badRequest()
-                        .body(ApiResponse.error("Signup failed!")));
+                        .body(ApiRes.error("Signup failed!")));
     }
 
 
@@ -116,12 +115,12 @@ public class AuthController {
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<ApiResponse<String>> delete(@AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<ApiRes<String>> delete(@AuthenticationPrincipal Jwt jwt) {
         Optional<User> opt = userService.deleteUser(jwt.getClaimAsString("username"));
         if (opt.isEmpty()) {
-            return ResponseEntity.badRequest().body(ApiResponse.error("User not found!"));
+            return ResponseEntity.badRequest().body(ApiRes.error("User not found!"));
         }
-        return ResponseEntity.ok(ApiResponse.success(
+        return ResponseEntity.ok(ApiRes.success(
                 "User deleted successfully!", "User deleted successfully!"));
     }
 
