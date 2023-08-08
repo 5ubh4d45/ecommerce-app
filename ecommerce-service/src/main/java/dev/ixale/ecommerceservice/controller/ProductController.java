@@ -1,14 +1,18 @@
 package dev.ixale.ecommerceservice.controller;
 
 import dev.ixale.ecommerceservice.common.ApiRes;
+import dev.ixale.ecommerceservice.common.Utils;
 import dev.ixale.ecommerceservice.dto.ProductDto;
+import dev.ixale.ecommerceservice.exception.InvalidRequestException;
 import dev.ixale.ecommerceservice.exception.NotFoundException;
 import dev.ixale.ecommerceservice.exception.OperationFailedException;
 import dev.ixale.ecommerceservice.model.Category;
 import dev.ixale.ecommerceservice.service.ProductService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -59,8 +63,18 @@ public class ProductController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<ApiRes<ProductDto>> createProduct(@RequestBody @NotBlank ProductDto productDto) {
-        // TODO: validate product
+    public ResponseEntity<ApiRes<ProductDto>> createProduct(
+            @Valid @RequestBody ProductDto productDto,
+            BindingResult bindingResult) {
+
+        // validate product
+        if (bindingResult.hasErrors()) {
+            throw new InvalidRequestException(
+                    "Invalid product details, could not create the product" +
+                    " Please check the 'data' to see details.",
+                    Utils.extractErrFromValid(bindingResult));
+        }
+
         // fetches category from service
         Optional<Category> opt = productService.getValidCategory(productDto.getCategoryId());
 
@@ -78,10 +92,17 @@ public class ProductController {
 
     @PutMapping("/update/{productId}")
     public ResponseEntity<ApiRes<ProductDto>> updateProduct(
-            @PathVariable Long productId,
-            @RequestBody @NotBlank ProductDto productDto) {
+            @PathVariable Long productId, @RequestBody @NotBlank ProductDto productDto,
+            BindingResult bindingResult) {
 
-        // TODO: validate product
+        // validate product
+        if (bindingResult.hasErrors()) {
+            throw new InvalidRequestException(
+                    "Invalid product details, could not update the product." +
+                    " Please check the 'data' to see details.",
+                    Utils.extractErrFromValid(bindingResult));
+        }
+
         // fetches category from service
         Optional<Category> opt = productService.getValidCategory(productDto.getCategoryId());
 

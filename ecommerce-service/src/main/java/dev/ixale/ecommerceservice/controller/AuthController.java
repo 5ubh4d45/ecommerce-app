@@ -8,7 +8,6 @@ import dev.ixale.ecommerceservice.dto.UserDto;
 import dev.ixale.ecommerceservice.enums.Authority;
 import dev.ixale.ecommerceservice.exception.AlreadyExistsException;
 import dev.ixale.ecommerceservice.exception.InvalidRequestException;
-import dev.ixale.ecommerceservice.exception.NotFoundException;
 import dev.ixale.ecommerceservice.exception.OperationFailedException;
 import dev.ixale.ecommerceservice.model.User;
 import dev.ixale.ecommerceservice.service.TokenService;
@@ -22,9 +21,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -66,8 +63,9 @@ public class AuthController {
         // check if request is valid
         if (bindingResult.hasErrors()) {
             throw new InvalidRequestException(
-                    "Invalid login details, please put the login details correctly.",
-                    Utils.notValid(bindingResult));
+                    "Invalid login details, please put the login details correctly." +
+                    " Please check the 'data' to see details.",
+                    Utils.extractErrFromValid(bindingResult));
         }
 
         // try authenticate
@@ -120,7 +118,7 @@ public class AuthController {
         if (bindingResult.hasErrors()) {
             throw new InvalidRequestException(
                     "Invalid signup details, please put the signup details correctly.",
-                    Utils.notValid(bindingResult));
+                    Utils.extractErrFromValid(bindingResult));
         }
 
         // check if username or email already exists

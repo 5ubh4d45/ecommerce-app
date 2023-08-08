@@ -21,14 +21,13 @@ public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-	@Column(name = "name")
+	@Column(name = "name", unique = true)
 	private @NotBlank String name;
 	@Column(name = "desc")
     private @NotBlank String description;
     @Column(name = "img_url")
     private @NotBlank String imageUrl;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "category",
             fetch = FetchType.LAZY,
             cascade = CascadeType.ALL,

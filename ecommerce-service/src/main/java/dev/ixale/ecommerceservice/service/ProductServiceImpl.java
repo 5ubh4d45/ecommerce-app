@@ -61,6 +61,6 @@ public class ProductServiceImpl implements ProductService{
 
     @Override
     public Optional<Category> getValidCategory(Long categoryId) {
-        return categoryService.readCategory(categoryId);
+        return categoryService.getCategory(categoryId);
     }
 }
