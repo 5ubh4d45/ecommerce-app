@@ -82,11 +82,10 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
                 .authorizeHttpRequests(auth -> auth
                                 // TODO: update requestMatchers when the bug is fixed https://github.com/spring-projects/spring-security/issues/13568
-//                        .requestMatchers(new AntPathRequestMatcher("/api/v1/auth/**")).permitAll()
                                 .requestMatchers(new AntPathRequestMatcher("/")).permitAll()
                                 .requestMatchers(new AntPathRequestMatcher("/tokenDetails")).permitAll()
-//                        .requestMatchers(new AntPathRequestMatcher("/user")).permitAll()
-                                .requestMatchers(new AntPathRequestMatcher("/admin")).hasAuthority(Authority.READ.toString())
+                                .requestMatchers(new AntPathRequestMatcher("/user/**")).hasAuthority(Authority.USER.toString())
+                                .requestMatchers(new AntPathRequestMatcher("/admin/**")).hasAuthority(Authority.ADMIN.toString())
                                 // swagger & h2-console
                                 .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
                                 .requestMatchers(new AntPathRequestMatcher("/swagger-ui/**")).permitAll()

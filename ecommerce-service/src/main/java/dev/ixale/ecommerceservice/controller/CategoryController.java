@@ -1,6 +1,7 @@
 package dev.ixale.ecommerceservice.controller;
 
 import dev.ixale.ecommerceservice.common.ApiRes;
+import dev.ixale.ecommerceservice.exception.NotFoundException;
 import dev.ixale.ecommerceservice.model.Category;
 import dev.ixale.ecommerceservice.service.CategoryService;
 import dev.ixale.ecommerceservice.service.CategoryServiceImpl;
@@ -24,8 +25,9 @@ public class CategoryController {
     public ResponseEntity<ApiRes<List<Category>>> getCategories() {
         List<Category> body = categoryService.listCategories();
 
+        // throw exception if no categories found
         if (body.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiRes.error("No categories found"));
+            throw new NotFoundException("No categories found");
         }
 
 //        body.forEach((item) -> System.out.println(item.toString()));
@@ -36,14 +38,19 @@ public class CategoryController {
 
     @GetMapping("/{categoryId}")
     public ResponseEntity<ApiRes<Category>> getCategory(@PathVariable Long categoryId) {
+        // fetches category from service
         Optional<Category> body = categoryService.readCategory(categoryId);
+
+        // returns response with the category if found, else returns NotFoundException
         return body.map(category ->
                 ResponseEntity.ok(ApiRes.success(category, "Category fetched successfully")))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiRes.error("Category does not exists")));
+                .orElseThrow(() -> new NotFoundException("Category does not exists"));
     }
 
     @PostMapping("/create")
     public ResponseEntity<ApiRes<Category>> createCategory(@RequestBody Category category) {
+        // TODO: validate category
+        // create category from service
         Category body = categoryService.createCategory(category);
         return new ResponseEntity<>(
                	ApiRes.success(body, "Category created successfully"),
@@ -52,22 +59,30 @@ public class CategoryController {
     }
 
     @PutMapping("/update/{categoryId}")
-    public ResponseEntity<ApiRes<Category>> updateCategory(@PathVariable Long categoryId, @RequestBody Category category) {
+    public ResponseEntity<ApiRes<Category>> updateCategory(
+            @PathVariable Long categoryId,
+           @RequestBody Category category) {
+
+        // TODO: validate category
+        // update category from service
         Optional<Category> updatedCategory = categoryService.updateCategory(categoryId, category);
 
-        // return with ternary expression
-        return updatedCategory.isEmpty()
-                ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiRes.error("Could not find the category"))
-                : ResponseEntity.status(HttpStatus.OK).body(ApiRes.success(updatedCategory.get(), "Category updated successfully"));
+        // return the updated category if found, else throw NotFoundException
+        return updatedCategory.map(data -> ResponseEntity.status(HttpStatus.OK).body(
+                        ApiRes.success(updatedCategory.get(), "Category updated successfully")))
+                .orElseThrow(() -> new NotFoundException("Category does not exists"));
     }
 
     @DeleteMapping("/delete/{categoryId}")
     public ResponseEntity<ApiRes<Category>> deleteCategory(@PathVariable Long categoryId) {
+
+        // TODO: validate category
+        // delete category from service
         Optional<Category> deletedCategory = categoryService.deleteCategory(categoryId);
 
-        // return with functional style expression
-        return deletedCategory.map(data ->
-                ResponseEntity.status(HttpStatus.OK).body(ApiRes.success(data, "Category deleted successfully")))
-                .orElseGet(() ->ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiRes.error("Category does not exists")));
+        // return the deleted category if found, else throw NotFoundException
+        return deletedCategory.map(data -> ResponseEntity.status(HttpStatus.OK).body(
+                        ApiRes.success(data, "Category deleted successfully")))
+                .orElseThrow(() -> new NotFoundException("Category does not exists"));
     }
 }

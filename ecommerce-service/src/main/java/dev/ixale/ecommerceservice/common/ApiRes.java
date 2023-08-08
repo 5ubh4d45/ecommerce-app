@@ -3,6 +3,7 @@ package dev.ixale.ecommerceservice.common;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.time.Instant;
+import java.util.Map;
 
 /**
  * ApiRes is a generic class that is used to return a response to the client
@@ -33,7 +34,7 @@ public class ApiRes<T> {
     }
 
     /**
-     * Create a success ApiRes
+     * Create a success ApiRes with a message and body
      * @param data data to be returned
      * @param message success message
      * @return ApiRes with success = true
@@ -44,13 +45,24 @@ public class ApiRes<T> {
     }
 
     /**
-     * Create an error ApiRes
+     * Create an error ApiRes with a message
      * @param message error message
      * @return ApiRes with success = false
      * @param <T> type of data
      */
     public static <T> ApiRes<T> error(String message) {
         return new ApiRes<>(false, message, null);
+    }
+    /**
+     * Create an error ApiRes with a message and a error details object
+     * Preferably a <b>Map of {@code <String, String>}</b>
+     * @param message error message
+     * @param details error details object to be passed onto the response.
+     * @return ApiRes with success = false
+     * @param <T> type of data
+     */
+    public static <T> ApiRes<T> error(String message, T details) {
+        return new ApiRes<>(false, message, details);
     }
 
     private ApiRes(Boolean success, String message, T data) {
