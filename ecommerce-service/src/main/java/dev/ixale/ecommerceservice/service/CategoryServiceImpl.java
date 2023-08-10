@@ -4,6 +4,8 @@ import dev.ixale.ecommerceservice.dto.CategoryDto;
 import dev.ixale.ecommerceservice.model.Category;
 import dev.ixale.ecommerceservice.repository.CategoryRepository;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -14,7 +16,10 @@ import java.util.Set;
 @Transactional
 @Service
 public class CategoryServiceImpl implements CategoryService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CategoryServiceImpl.class);
+
     private final CategoryRepository categoryRepository;
+
     public CategoryServiceImpl(CategoryRepository categoryRepo) {
         this.categoryRepository = categoryRepo;
     }

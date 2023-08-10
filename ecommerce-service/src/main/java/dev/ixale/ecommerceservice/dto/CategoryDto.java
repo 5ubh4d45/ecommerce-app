@@ -13,10 +13,13 @@ import java.util.Set;
 @Setter
 public class CategoryDto {
     private Long id;
+
     @NotBlank(message = "Name cannot be blank!")
     private String name;
+
     @NotBlank(message = "Description cannot be blank!")
     private String description;
+
     @NotBlank(message = "Image URL cannot be blank!")
     private String imageUrl;
 

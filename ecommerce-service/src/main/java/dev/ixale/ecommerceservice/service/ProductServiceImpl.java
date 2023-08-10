@@ -4,6 +4,8 @@ import dev.ixale.ecommerceservice.dto.ProductDto;
 import dev.ixale.ecommerceservice.model.Category;
 import dev.ixale.ecommerceservice.model.Product;
 import dev.ixale.ecommerceservice.repository.ProductRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,6 +13,8 @@ import java.util.Optional;
 
 @Service
 public class ProductServiceImpl implements ProductService{
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProductServiceImpl.class);
+
     private final ProductRepository productRepository;
     private final CategoryService categoryService;
 
