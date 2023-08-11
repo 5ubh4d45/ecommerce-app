@@ -3,10 +3,8 @@ package dev.ixale.ecommerceservice.controller;
 import dev.ixale.ecommerceservice.common.ApiRes;
 import dev.ixale.ecommerceservice.common.Utils;
 import dev.ixale.ecommerceservice.dto.CategoryDto;
+import dev.ixale.ecommerceservice.exception.DoesNotExistsException;
 import dev.ixale.ecommerceservice.exception.InvalidRequestException;
-import dev.ixale.ecommerceservice.exception.NotFoundException;
-import dev.ixale.ecommerceservice.exception.OperationFailedException;
-import dev.ixale.ecommerceservice.model.Category;
 import dev.ixale.ecommerceservice.service.CategoryService;
 import dev.ixale.ecommerceservice.service.CategoryServiceImpl;
 import jakarta.validation.Valid;
@@ -29,11 +27,11 @@ public class CategoryController {
 
     @GetMapping("/")
     public ResponseEntity<ApiRes<List<CategoryDto>>> getCategories() {
-        List<CategoryDto> body = categoryService.listCategories();
 
+        List<CategoryDto> body = categoryService.listCategories();
         // throw exception if no categories found
         if (body.isEmpty()) {
-            throw new NotFoundException("No categories found");
+            throw new DoesNotExistsException("No categories found");
         }
 
 //        body.forEach((item) -> System.out.println(item.toString()));
@@ -48,11 +46,11 @@ public class CategoryController {
         // fetches category from service
         Optional<CategoryDto> body = categoryService.readCategory(categoryId);
 
-        // returns response with the category if found, else returns NotFoundException
+        // returns response with the category if found, else returns DoesNotExistsException
         return body.map(category ->
                 ResponseEntity.ok(ApiRes.success(category,
                         "Category fetched successfully")))
-                .orElseThrow(() -> new NotFoundException("Category does not exists"));
+                .orElseThrow(() -> new DoesNotExistsException("Category does not exists"));
     }
 
     @PostMapping("/create")
@@ -75,8 +73,7 @@ public class CategoryController {
                 ResponseEntity.status(HttpStatus.CREATED).body(
                         ApiRes.success(body, "Category created successfully")))
                 .orElseThrow(() ->
-                    new OperationFailedException("Category could not be created")
-        );
+                    new DoesNotExistsException("Category does not exists"));
     }
 
     @PutMapping("/update/{categoryId}")
@@ -95,10 +92,10 @@ public class CategoryController {
         // update category from service
         Optional<CategoryDto> updatedCategory = categoryService.updateCategory(categoryId, category);
 
-        // return the updated category if found, else throw NotFoundException
+        // return the updated category if found, else throw DoesNotExistsException
         return updatedCategory.map(data -> ResponseEntity.status(HttpStatus.OK).body(
                         ApiRes.success(updatedCategory.get(), "Category updated successfully")))
-                .orElseThrow(() -> new NotFoundException("Category does not exists"));
+                .orElseThrow(() -> new DoesNotExistsException("Category does not exists"));
     }
 
     @DeleteMapping("/delete/{categoryId}")
@@ -107,9 +104,9 @@ public class CategoryController {
         // delete category from service
         Optional<CategoryDto> deletedCategory = categoryService.deleteCategory(categoryId);
 
-        // return the deleted category if found, else throw NotFoundException
+        // return the deleted category if found, else throw DoesNotExistsException
         return deletedCategory.map(data -> ResponseEntity.status(HttpStatus.OK).body(
                         ApiRes.success(data, "Category deleted successfully")))
-                .orElseThrow(() -> new NotFoundException("Category does not exists"));
+                .orElseThrow(() -> new DoesNotExistsException("Category does not exists"));
     }
 }

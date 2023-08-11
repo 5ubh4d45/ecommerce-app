@@ -1,7 +1,8 @@
 package dev.ixale.ecommerceservice.service;
 
+import dev.ixale.ecommerceservice.common.Utils;
+import dev.ixale.ecommerceservice.exception.FailedOperationException;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
@@ -17,14 +18,16 @@ import java.util.stream.Collectors;
 public class TokenServiceImpl implements TokenService{
     private final JwtEncoder jwtEncoder;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TokenServiceImpl.class);
+    private static final Logger LOGGER = Utils.getLogger(TokenServiceImpl.class);
 
     public TokenServiceImpl(JwtEncoder jwtEncoder) {
         this.jwtEncoder = jwtEncoder;
     }
 
     @Override
-    public String generateToken(Authentication authentication) {
+    public String generateJwt(Authentication authentication) throws FailedOperationException {
+        try {
+
         Instant now = Instant.now();
         String scope = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
@@ -46,5 +49,9 @@ public class TokenServiceImpl implements TokenService{
                 ", with scope: " + scope);
 
         return this.jwtEncoder.encode(JwtEncoderParameters.from(claimsSet)).getTokenValue();
+        } catch (Exception e) {
+            LOGGER.error("Error generating token.", e);
+            throw new FailedOperationException("Error generating token");
+        }
     }
 }
