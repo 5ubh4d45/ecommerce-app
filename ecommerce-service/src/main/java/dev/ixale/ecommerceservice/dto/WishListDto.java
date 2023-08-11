@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,46 +23,65 @@ public class WishListDto {
     @NotBlank(message = "Description cannot be blank!")
     private String description;
 
+    private Instant createdAt;
+
+    private Instant modifiedAt;
+
     private Set<Long> productIds;
 
-    public WishListDto(Long id, String name, String description, Set<Long> productIds) {
+    public WishListDto(Long id,
+                       String name,
+                       String description,
+                       Instant createdAt,
+                       Instant modifiedAt,
+                       Set<Long> productIds) {
         this.id = id;
         this.name = name;
         this.description = description;
+        this.createdAt = createdAt;
+        this.modifiedAt = modifiedAt;
         this.productIds = productIds;
     }
 
-    public WishListDto(String name, String description, Set<Long> productIds) {
+    public WishListDto(String name,
+                       String description,
+                       Set<Long> productIds) {
         this.id = null;
         this.name = name;
         this.description = description;
+        this.createdAt = null;
+        this.modifiedAt = null;
         this.productIds = productIds;
     }
 
     public static WishListDto toDto(WishList wishList) {
         return new WishListDto(
-            wishList.getId(),
-            wishList.getName(),
-            wishList.getDescription(),
-            wishList.getProducts().stream()
-                .map(Product::getId)
-                .collect(Collectors.toSet())
+                wishList.getId(),
+                wishList.getName(),
+                wishList.getDescription(),
+                wishList.getCreatedAt(),
+                wishList.getModifiedAt(),
+                wishList.getProducts().stream()
+                        .map(Product::getId)
+                        .collect(Collectors.toSet())
         );
     }
 
     public static List<WishListDto> toDto(List<WishList> wishLists) {
         return wishLists.stream()
-            .map(WishListDto::toDto)
-            .collect(Collectors.toList());
+                .map(WishListDto::toDto)
+                .collect(Collectors.toList());
     }
 
     public static WishList toEntity(WishListDto wishListDto, User user, Set<Product> products) {
         return new WishList(
-            wishListDto.getId(),
-            wishListDto.getName(),
-            wishListDto.getDescription(),
-            user,
-            products
+                wishListDto.getId(),
+                wishListDto.getName(),
+                wishListDto.getDescription(),
+                wishListDto.getCreatedAt(),
+                wishListDto.getModifiedAt(),
+                user,
+                products
         );
     }
 
@@ -71,6 +91,8 @@ public class WishListDto {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
+                ", createdAt=" + createdAt + '\'' +
+                ", modifiedAt=" + modifiedAt + '\'' +
                 ", productIds=" + productIds.stream()
                 .map(Object::toString)
                 .collect(Collectors.joining(", ")) +

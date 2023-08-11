@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -27,6 +28,12 @@ public class WishList {
     @Column(name = "desc")
     private String description;
 
+    @Column(name = "created_at")
+    private Instant createdAt;
+
+    @Column(name = "modified_at")
+    private Instant modifiedAt;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -44,6 +51,8 @@ public class WishList {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
+                ", dateCreated=" + createdAt + '\'' +
+                ", dateModified=" + modifiedAt + '\'' +
                 ", user=" + user + '\'' +
                 ", products=" + products.stream()
                 .map(p -> p.getId().toString())
