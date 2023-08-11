@@ -1,5 +1,9 @@
 package dev.ixale.ecommerceservice.common;
 
+import dev.ixale.ecommerceservice.controller.AuthController;
+import jakarta.validation.constraints.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.validation.BindingResult;
 
 import java.util.Map;
@@ -18,5 +22,15 @@ public class Utils {
                 .collect(Collectors.toMap(
                         err -> err.getField(),
                         err -> err.getDefaultMessage() == null ? "" : err.getDefaultMessage()));
+    }
+
+    /**
+     * Returns a logger instance for a given class.
+     *
+     * @param clazz the class for which the logger is requested
+     * @return the logger instance
+     */
+    public static Logger getLogger(@NotNull Class<?> clazz) {
+        return LoggerFactory.getLogger(clazz);
     }
 }

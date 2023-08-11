@@ -9,6 +9,21 @@ import lombok.Setter;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Represents a Data Transfer Object (DTO) for a Category.
+ *
+ * <p>
+ * This class provides getter and setter methods for the properties of a
+ * CategoryDto object. It also includes constructors to create CategoryDto
+ * objects with different combinations of properties.
+ * </p>
+ *
+ * <p>
+ * Additionally, this class provides static methods to convert between Category
+ * and CategoryDto objects. These conversion methods can be used to map data
+ * between the domain model and the DTO in the application.
+ * </p>
+ */
 @Getter
 @Setter
 public class CategoryDto {
