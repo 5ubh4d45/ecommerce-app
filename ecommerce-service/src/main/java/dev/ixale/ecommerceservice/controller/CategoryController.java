@@ -1,12 +1,16 @@
 package dev.ixale.ecommerceservice.controller;
 
 import dev.ixale.ecommerceservice.common.ApiRes;
-import dev.ixale.ecommerceservice.exception.NotFoundException;
-import dev.ixale.ecommerceservice.model.Category;
+import dev.ixale.ecommerceservice.common.Utils;
+import dev.ixale.ecommerceservice.dto.CategoryDto;
+import dev.ixale.ecommerceservice.exception.DoesNotExistsException;
+import dev.ixale.ecommerceservice.exception.InvalidRequestException;
 import dev.ixale.ecommerceservice.service.CategoryService;
 import dev.ixale.ecommerceservice.service.CategoryServiceImpl;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,67 +26,87 @@ public class CategoryController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<ApiRes<List<Category>>> getCategories() {
-        List<Category> body = categoryService.listCategories();
+    public ResponseEntity<ApiRes<List<CategoryDto>>> getCategories() {
 
+        List<CategoryDto> body = categoryService.listCategories();
         // throw exception if no categories found
         if (body.isEmpty()) {
-            throw new NotFoundException("No categories found");
+            throw new DoesNotExistsException("No categories found");
         }
 
 //        body.forEach((item) -> System.out.println(item.toString()));
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(ApiRes.success(body, "Categories fetched successfully"));
+                .body(ApiRes.success(body,
+                        "Categories fetched successfully"));
     }
 
     @GetMapping("/{categoryId}")
-    public ResponseEntity<ApiRes<Category>> getCategory(@PathVariable Long categoryId) {
+    public ResponseEntity<ApiRes<CategoryDto>> getCategory(@PathVariable Long categoryId) {
         // fetches category from service
-        Optional<Category> body = categoryService.readCategory(categoryId);
+        Optional<CategoryDto> body = categoryService.readCategory(categoryId);
 
-        // returns response with the category if found, else returns NotFoundException
+        // returns response with the category if found, else returns DoesNotExistsException
         return body.map(category ->
-                ResponseEntity.ok(ApiRes.success(category, "Category fetched successfully")))
-                .orElseThrow(() -> new NotFoundException("Category does not exists"));
+                ResponseEntity.ok(ApiRes.success(category,
+                        "Category fetched successfully")))
+                .orElseThrow(() -> new DoesNotExistsException("Category does not exists"));
     }
 
     @PostMapping("/create")
-    public ResponseEntity<ApiRes<Category>> createCategory(@RequestBody Category category) {
-        // TODO: validate category
+    public ResponseEntity<ApiRes<CategoryDto>> createCategory(
+            @Valid @RequestBody CategoryDto category,
+            BindingResult bindingResult) {
+
+        // validate category
+        if (bindingResult.hasErrors()){
+            throw new InvalidRequestException(
+                    "Invalid category details, cloud not create category." +
+                    " please put the category details correctly.",
+                    Utils.extractErrFromValid(bindingResult));
+        }
+
         // create category from service
-        Category body = categoryService.createCategory(category);
-        return new ResponseEntity<>(
-               	ApiRes.success(body, "Category created successfully"),
-                HttpStatus.CREATED
-        );
+        Optional<CategoryDto> categoryOpt = categoryService.createCategory(category);
+
+        return categoryOpt.map(body ->
+                ResponseEntity.status(HttpStatus.CREATED).body(
+                        ApiRes.success(body, "Category created successfully")))
+                .orElseThrow(() ->
+                    new DoesNotExistsException("Category does not exists"));
     }
 
     @PutMapping("/update/{categoryId}")
-    public ResponseEntity<ApiRes<Category>> updateCategory(
-            @PathVariable Long categoryId,
-           @RequestBody Category category) {
+    public ResponseEntity<ApiRes<CategoryDto>> updateCategory(
+            @PathVariable Long categoryId, @Valid @RequestBody CategoryDto category,
+            BindingResult bindingResult) {
 
-        // TODO: validate category
+        // validate category
+        if (category.getName() == null || category.getName().isEmpty()) {
+            throw new InvalidRequestException(
+                    "Invalid category details, cloud not update category." +
+                    " please put the category details correctly.",
+                    Utils.extractErrFromValid(bindingResult));
+        }
+
         // update category from service
-        Optional<Category> updatedCategory = categoryService.updateCategory(categoryId, category);
+        Optional<CategoryDto> updatedCategory = categoryService.updateCategory(categoryId, category);
 
-        // return the updated category if found, else throw NotFoundException
+        // return the updated category if found, else throw DoesNotExistsException
         return updatedCategory.map(data -> ResponseEntity.status(HttpStatus.OK).body(
                         ApiRes.success(updatedCategory.get(), "Category updated successfully")))
-                .orElseThrow(() -> new NotFoundException("Category does not exists"));
+                .orElseThrow(() -> new DoesNotExistsException("Category does not exists"));
     }
 
     @DeleteMapping("/delete/{categoryId}")
-    public ResponseEntity<ApiRes<Category>> deleteCategory(@PathVariable Long categoryId) {
+    public ResponseEntity<ApiRes<CategoryDto>> deleteCategory(@PathVariable Long categoryId) {
 
-        // TODO: validate category
         // delete category from service
-        Optional<Category> deletedCategory = categoryService.deleteCategory(categoryId);
+        Optional<CategoryDto> deletedCategory = categoryService.deleteCategory(categoryId);
 
-        // return the deleted category if found, else throw NotFoundException
+        // return the deleted category if found, else throw DoesNotExistsException
         return deletedCategory.map(data -> ResponseEntity.status(HttpStatus.OK).body(
                         ApiRes.success(data, "Category deleted successfully")))
-                .orElseThrow(() -> new NotFoundException("Category does not exists"));
+                .orElseThrow(() -> new DoesNotExistsException("Category does not exists"));
     }
 }

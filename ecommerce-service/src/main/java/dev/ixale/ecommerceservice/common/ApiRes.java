@@ -1,14 +1,17 @@
 package dev.ixale.ecommerceservice.common;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Getter;
 
 import java.time.Instant;
 import java.util.Map;
 
 /**
- * ApiRes is a generic class that is used to return a response to the client
- * @param <T> type of data
+ * ApiRes is a generic class that is used to return a response to the client.
+ *
+ * @param <T> the type of data
  */
+@Getter
 public class ApiRes<T> {
     private final Boolean success;
     private final String message;
@@ -16,22 +19,6 @@ public class ApiRes<T> {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private final T data;
     private final Instant timeStamp;
-
-    public Boolean getSuccess() {
-        return success;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public Instant getTimeStamp() {
-        return timeStamp;
-    }
-
-    public T getData() {
-        return data;
-    }
 
     /**
      * Create a success ApiRes with a message and body

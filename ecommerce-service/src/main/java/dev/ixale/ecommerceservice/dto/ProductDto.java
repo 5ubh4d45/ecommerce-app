@@ -18,11 +18,21 @@ import java.util.List;
 @Setter
 public class ProductDto {
     private Long id;
-    private @NotBlank String name;
-    private @NotBlank String description;
-    private @NotBlank Double price;
-    private @NotBlank String imageUrl;
-    private @NotBlank Long categoryId;
+
+    @NotBlank(message = "Name cannot be blank!")
+    private String name;
+
+    @NotBlank(message = "Description cannot be blank!")
+    private String description;
+
+    @NotBlank(message = "Price cannot be blank!")
+    private Double price;
+
+    @NotBlank(message = "Image URL cannot be blank!")
+    private String imageUrl;
+
+    @NotBlank(message = "Category ID cannot be blank!")
+    private Long categoryId;
 
     public ProductDto() {
     }
